@@ -1,0 +1,156 @@
+<html>
+<!-- A basic page to show accelerometer data from socketio -->
+<head>
+    <title>Accelerometer Data</title>
+    <script src="https://code.jquery.com/jquery-3.6.3.slim.min.js" integrity="sha256-ZwqZIVdD3iXNyGHbSYdsmWP//UBokj2FHAxKuSBKDSo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+        "three": "https://unpkg.com/three/build/three.module.js"
+        }
+    }
+    </script>
+    <style>
+        .info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display:block;
+            color: white;
+        }
+    </style>
+    
+</head>
+<body style="margin: 0;">
+    <script type="module">
+        import * as THREE from 'three';
+        // Connect to socketio
+        var socket = io.connect();
+        // When socketio sends data, update the page
+        
+        let rotCap = 20;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        const geometry = new THREE.BoxGeometry( 2, 5, 0.1 );
+        const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
+
+        const ballGeometry = new THREE.SphereGeometry( 0.2, 32, 32 );
+        const ballMaterial = new THREE.MeshBasicMaterial( { color: 0xFF0000 } );
+
+        //Create a frame for the pong game to be encased in
+        const frameGeometry = new THREE.BoxGeometry( 40, 1, 1 );
+        const frameMaterial = new THREE.MeshBasicMaterial( { color: 0x0000FF } );
+        
+        //Add the four sides of the frame
+        const frameTop = new THREE.Mesh( frameGeometry, frameMaterial );
+        frameTop.position.y = 15;
+        scene.add( frameTop );
+        
+        const frameBottom = new THREE.Mesh( frameGeometry, frameMaterial );
+        frameBottom.position.y = -15;
+        scene.add( frameBottom );
+        
+        const leftPaddle = new THREE.Mesh( geometry, material );
+        leftPaddle.position.x = -20;
+        scene.add( leftPaddle );
+
+        //Put ball on center of paddle
+        const leftBall = new THREE.Mesh( ballGeometry, ballMaterial );
+        leftBall.position.x = leftPaddle.position.x;
+        leftBall.position.y = leftPaddle.position.y;
+        leftBall.position.z = leftPaddle.position.z;
+        scene.add( leftBall );
+
+        let pongSpeedX = 1;
+        let pongSpeedY = Math.round((Math.random() * 2)-1)
+
+        let targetBeta = 0;
+        
+
+        const pongGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+        const pongMaterial = new THREE.MeshBasicMaterial( { color: 0x00FF00 } );
+        const pongBall = new THREE.Mesh( pongGeometry, pongMaterial );
+        pongBall.position.x = 0;
+        pongBall.position.y = 0;
+        pongBall.position.z = 0;
+        scene.add( pongBall );
+
+
+        camera.position.z = 20;
+
+        function detectPongBallCollision(){
+            //Detect collision against walls, paddles, out of bounds
+            if(pongBall.position.y > 15 || pongBall.position.y < -15){
+                pongSpeedY *= -1;
+            }
+            if(pongBall.position.x > 20 || pongBall.position.x < -20){
+                //If colliding against paddle
+                if(pongBall.position.x > 20 && pongBall.position.y < leftPaddle.position.y + 2.5 && pongBall.position.y > leftPaddle.position.y - 2.5){
+                    pongSpeedX *= -1;
+                }
+                else{
+                    pongBall.position.x = 0;
+                    pongBall.position.y = 0;
+                    pongSpeedX = 0.05;
+                    pongSpeedY = 0.05*Math.round((Math.random() * 2)-1);
+                }
+            }
+
+        }
+
+
+        function animate() {
+            requestAnimationFrame( animate );
+
+            detectPongBallCollision();
+
+            pongBall.position.x += pongSpeedX;
+            pongBall.position.y += pongSpeedY;
+            
+            let rotMultiplier = -( leftPaddle.rotation.x / (Math.PI/2));
+
+            if(leftPaddle.rotation.x > 0){
+
+                leftPaddle.position.y += 0.04 * rotMultiplier;
+                leftBall.position.y += 0.05 * rotMultiplier;
+            }
+            if(leftPaddle.rotation.x < 0){
+                leftPaddle.position.y += 0.04 * rotMultiplier;
+                leftBall.position.y += 0.05 * rotMultiplier;
+            }
+
+            leftPaddle.rotation.x = targetBeta*0.3 + leftPaddle.rotation.x*0.7;
+
+            renderer.render( scene, camera );
+        }
+        animate();
+
+
+        socket.on('gyro', function (data) {
+
+            targetBeta = data.beta * Math.PI/180;
+
+            //leftPaddle.rotation.x = data.beta * Math.PI/180;
+
+            
+        });
+    </script>
+    <!-- <div class="info">
+        <h1>Accelerometer Data</h1>
+        <p>X: <span id="x"></span></p>
+        <p>Y: <span id="y"></span></p>
+        <p>Z: <span id="z"></span></p>
+    </div> -->
+    
+</body>
+</html>

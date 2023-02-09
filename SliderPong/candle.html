@@ -1,0 +1,43 @@
+<!-- A page that emulates a candle, with a fullscreen canvas that
+    displays a candle that burns down with time, and can get blown out
+    and reignited with multiple taps/clicks. Takes accelerometer data and sends it 
+    to socketio, also receives blowout and reignite events from socketio -->
+<html>
+    <head>
+        <title>Candle</title>
+        <!-- Use https -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js" integrity="sha512-avLcnGxl5mqAX/wIKERdb1gFNkOLHh2W5JNCfJm5OugpEPBz7LNXJJ3BDjjwO00AxEY1MqdNjtEmiYhKC0ld7g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+        <script type="importmap">
+        {
+            "imports": {
+            "three": "https://unpkg.com/three/build/three.module.js"
+            }
+        }
+        </script>
+        <style>
+            #candle {
+                position: absolute;
+                top: 10px;
+                width: 100%;
+                text-align: center;
+                z-index: 100;
+                display:block;
+                color: white;
+            }
+        </style>
+        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous"></script>
+    </head>
+    <body style="margin: 0;">
+        <div id="candle">
+            <!-- <canvas id="candleCanvas" width="1000" height="1000"></canvas> -->
+            <!-- Text box to show debug messages -->
+            <p id="debug">Test</p>
+            <!-- Button to request permission -->
+            <button onclick="getPermission()" style="padding:10px;">Request!</button>
+            <button id="changePlayer" style="padding:10px;">Player 2</button>
+        </div>
+    </body>
+    <!-- Load script from candleDisplay.js -->
+    <script type="module" src="candleDisplay.js"></script>
+</html>

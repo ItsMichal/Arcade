@@ -1,0 +1,2 @@
+/* global CANNON,THREE,Detector */
+
