@@ -47,6 +47,35 @@ function getPlayerById(id){
     return null;
 }
 
+function runKeepAliveTimer(){
+    //Iterate through player list and decrement timer if it exists
+    for(var i = 0; i < curPlayers.length; i++){
+        if(curPlayers[i].timer != null){
+            curPlayers[i].timer--;
+            if(curPlayers[i].timer <= 0){
+                console.log("PLAYER " + curPlayers[i].id + " TIMED OUT");
+                //Reset the player's partner
+                let otherPlayer = getPlayerById(curPlayers[i].partner);
+                if(otherPlayer != null){
+                    otherPlayer.inGame = false;
+                    otherPlayer.ready = false;
+                    otherPlayer.partner = null;
+                    io.to(otherPlayer.id).emit('resetGame');
+                }
+                //Reset the player
+                curPlayers[i].inGame = false;
+                curPlayers[i].ready = false;
+                curPlayers[i].partner = null;
+                curPlayers[i].timer = null;
+                io.to(curPlayers[i].id).emit('resetGame');
+            }
+        }
+    }
+    
+}
+
+setInterval(runKeepAliveTimer, 1000);
+
 
 io.sockets.on('connection', function(socket){
     //Add socket to list of players
@@ -85,6 +114,10 @@ io.sockets.on('connection', function(socket){
             //Emit a start game event
             io.to(player.id).emit('startGame', {listener: false});
             io.to(otherPlayer.id).emit('startGame', {listener: true});
+
+            //Start a keep alive timer for both players
+            player.timer = 15;
+            otherPlayer.timer = 15;
         }else{
             io.to(player.id).emit('waitForPartner');
         }
@@ -100,7 +133,12 @@ io.sockets.on('connection', function(socket){
             if(otherPlayer != null){
                 //Send the game state to the other player
                 io.to(otherPlayer.id).emit('updateGameState', data);
+
+                //Reset the keep alive timer
+                otherPlayer.timer = 15;
             }
+
+            player.timer = 15;
         }
     });
 
