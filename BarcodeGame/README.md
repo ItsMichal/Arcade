@@ -14,4 +14,4 @@ The basic Unity fighter game which calls the PrintService above. It facilitates 
 
 Currently supports only attacks and heals, but plans to support a rock-paper-scissors style buff/debuff system as well as replacing the "hard cooldown" with one that scales the effect of the action instead of blocking it.
 
-Can be opened and edited as a Unity project, my scripts are in `BarcodeUnity/Assets/Scripts` for your viewing pleasure (also includes a modified [`UnitySerialPort.cs` from @dyadica](!https://github.com/dyadica/Unity_SerialPort))
+Can be opened and edited as a Unity project, my scripts are in `BarcodeUnity/Assets/Scripts` for your viewing pleasure (also includes a modified [`UnitySerialPort.cs` from @dyadica](https://github.com/dyadica/Unity_SerialPort))
