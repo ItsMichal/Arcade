@@ -33,6 +33,12 @@ public class PrintManager : MonoBehaviour
         }
     }
 
+    //Print a single action
+    IEnumerator PrintBarcode(BarcodeHandler.BarcodeDetails details)
+    {
+        yield return PrintStrings(new string[] { details.barcode, details.targetPlayerId == 0 ? "Player 1" : "Player 2", details.action.name, details.action.type.ToString() });
+    }
+   
 
     public string StringsToJSON(string[] strings)
     {
@@ -41,9 +47,11 @@ public class PrintManager : MonoBehaviour
         for (int i = 0; i < strings.Length; i++)
         {
             if(i == strings.Length - 1){
-                json += "\"*"+ strings[i] + "*\"" + "]}";
+                // json += "\"*"+ strings[i] + "*\"" + "]}";
+                json += "\""+ strings[i] + "\"" + "]}";
             }else{
-                json += "\"*"+ strings[i] + "*\""+",";
+                json += "\""+ strings[i] + "\""+",";
+                // json += "\"*"+ strings[i] + "*\""+",";
             }
         }
         return json;

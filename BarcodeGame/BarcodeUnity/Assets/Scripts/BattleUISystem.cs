@@ -10,19 +10,13 @@ public class BattleUISystem : MonoBehaviour
     //TMP Text for Player 2 HP
     public TMPro.TextMeshProUGUI player2HpText;
 
-    //TMP Text for Player 1 Cooldown
-    public TMPro.TextMeshProUGUI player1CooldownText;
-
-    //TMP Text for Player 2 Cooldown
-    public TMPro.TextMeshProUGUI player2CooldownText;
-
     //TMP Text for Player 1 Message
     public TMPro.TextMeshProUGUI player1MessageText;
 
     //TMP Text for Player 2 Message
     public TMPro.TextMeshProUGUI player2MessageText;
 
-    public TMPro.TextMeshProUGUI whoseTurnText;
+    public TMPro.TextMeshProUGUI mainText;
 
     //Slider for player 1s health
     public UnityEngine.UI.Slider player1HpSlider;
@@ -30,30 +24,123 @@ public class BattleUISystem : MonoBehaviour
     //Slider for player 2s health
     public UnityEngine.UI.Slider player2HpSlider;
 
+    //Slider for player 1s cooldown/stamina
+    public UnityEngine.UI.Slider player1CooldownSlider;
+    public TMPro.TextMeshProUGUI player1CooldownText;
 
-    public void UpdateWhoseTurn(int playerId)
+    //Slider for player 2s cooldown/stamina
+    public UnityEngine.UI.Slider player2CooldownSlider;
+    public TMPro.TextMeshProUGUI player2CooldownText;
+
+    //Text for Cards/Tiers
+    public TMPro.TextMeshProUGUI tierCardText;
+
+    [System.Serializable]
+    public class ElementShieldImages {
+        public Sprite fire;
+        public Sprite water;
+        public Sprite ice;
+        public Sprite neutral;
+    }
+
+    public ElementShieldImages playerShieldImages;
+
+    //Image for player 1s elemental shield
+    public UnityEngine.UI.Image player1ShieldImage;
+
+    //Image for player 2s elemental shield
+    public UnityEngine.UI.Image player2ShieldImage;
+
+
+    public float mainTextSeconds = 5f;
+
+    private float mainTextTimer = 0f;
+
+    public void UpdateMainText(string text)
     {
-        //Update the text to show whose turn it is
+        // mainText.text = text;
+        // mainTextTimer = 0f;
+        EventItemManager.instance.CreateEventItem(text);
+    }
+    
+    public void UpdateStamina(int playerId, float curValue, float maxValue)
+    {
+        //Update the stamina for the player
         if (playerId == 0)
         {
-            whoseTurnText.text = "Player 1's Turn To Print!";
+            player1CooldownSlider.value = curValue;
+            player1CooldownSlider.maxValue = maxValue;
+            player1CooldownText.text = curValue.ToString("0") + "s" ;
         }
         else
         {
-            whoseTurnText.text = "Player 2's Turn To Print!";
+            player2CooldownSlider.value = curValue;
+            player2CooldownSlider.maxValue = maxValue;
+            player2CooldownText.text = curValue.ToString("0") + "s";
         }
     }
-    public void UpdateCooldown(int playerId, float cooldownTimer)
+
+    public void UpdateShield(int playerId, bool active, ActionManager.ActionElement element)
     {
-        //Update the cooldown timer for the player
+        //Update the shield for the player
         if (playerId == 0)
         {
-            player1CooldownText.text = cooldownTimer.ToString("0.00") + "s";
+            if (active)
+            {
+                switch (element)
+                {
+                    case ActionManager.ActionElement.Fire:
+                        player1ShieldImage.sprite = playerShieldImages.fire;
+                        break;
+                    case ActionManager.ActionElement.Water:
+                        player1ShieldImage.sprite = playerShieldImages.water;
+                        break;
+                    case ActionManager.ActionElement.Ice:
+                        player1ShieldImage.sprite = playerShieldImages.ice;
+                        break;
+                }
+            }
+            else
+            {
+                player1ShieldImage.sprite = playerShieldImages.neutral;
+            }
         }
         else
         {
-            player2CooldownText.text = cooldownTimer.ToString("0.00") + "s";
+            if (active)
+            {
+                switch (element)
+                {
+                    case ActionManager.ActionElement.Fire:
+                        player2ShieldImage.sprite = playerShieldImages.fire;
+                        break;
+                    case ActionManager.ActionElement.Water:
+                        player2ShieldImage.sprite = playerShieldImages.water;
+                        break;
+                    case ActionManager.ActionElement.Ice:
+                        player2ShieldImage.sprite = playerShieldImages.ice;
+                        break;
+                }
+            }
+            else
+            {
+                player2ShieldImage.sprite = playerShieldImages.neutral;
+            }
         }
+    }
+
+    public void UpdateTierText(float tierTimerLeft, float cardTimeLeft, int tier, bool maxTier =false)
+    {
+        string tierText = "Cards refresh in " + cardTimeLeft.ToString("0") + " seconds\n";
+        if(maxTier){
+            tierText += "Max Tier Reached";
+        }else{
+            tierText += "Tier " + (tier+1)+ " in " + tierTimerLeft.ToString("0") + " seconds\n";
+            tierText += "Shuffling Tier 0 to " + tier + " cards";
+        }
+
+        tierCardText.text = tierText;
+        
     }
 
     public void UpdateHp(int playerId, float currentHp)
@@ -61,12 +148,12 @@ public class BattleUISystem : MonoBehaviour
         //Update the HP for the player
         if (playerId == 0)
         {
-            player1HpText.text = "HP: " + currentHp.ToString("0.00");
+            player1HpText.text = "$" + currentHp.ToString("0.00") + "k";
             player1HpSlider.value = currentHp;
         }
         else
         {
-            player2HpText.text = "HP: " + currentHp.ToString("0.00");
+            player2HpText.text = "$" + currentHp.ToString("0.00") + "k";
             player2HpSlider.value = currentHp;
         }
     }
@@ -76,11 +163,21 @@ public class BattleUISystem : MonoBehaviour
         //Update the message for the player
         if (playerId == 0)
         {
-            player1MessageText.text = message;
+            // player1MessageText.text = message;
+            EventItemManager.instance.CreateEventItem("<sprite name=\"p1\"> "+message);
         }
         else
         {
-            player2MessageText.text = message;
+            // player2MessageText.text = message;
+            EventItemManager.instance.CreateEventItem("<sprite name=\"p2\"> "+message);
+        }
+    }
+
+    public void Update()
+    {
+        mainTextTimer += Time.deltaTime;
+        if(mainTextTimer > mainTextSeconds){
+            mainText.text = "";
         }
     }
 

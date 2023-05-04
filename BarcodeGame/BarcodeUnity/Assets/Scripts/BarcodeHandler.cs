@@ -28,7 +28,7 @@ public class BarcodeHandler : MonoBehaviour
         public int targetPlayerId;
     }
 
-    public BarcodeDetails GenerateBarcode(int targetPlayerId){
+    public BarcodeDetails GenerateBarcode(int targetPlayerId, ActionManager.Action action){
         //Create a random 3 letter string not already in the dictionary
         string barcode = "";
         do{
@@ -39,7 +39,9 @@ public class BarcodeHandler : MonoBehaviour
         }while(barcodeToAction.ContainsKey(barcode));
 
         //Pick to choose a random action from the list
-        ActionManager.Action action = actions[Random.Range(0, actions.Count)];
+        if(action == null){
+            action = actions[Random.Range(0, actions.Count)];
+        }
 
         //Add the barcode to the dictionary
         barcodeToAction.Add(barcode, action);
@@ -58,6 +60,7 @@ public class BarcodeHandler : MonoBehaviour
         };
     }
 
+    //DEPREC!
     public void PrintBarcodesForPlayer(int playerId){
         PrintManager.instance.StartCoroutine("PrintStrings", GetPlayersBarcodesToPrint(playerId));
     }

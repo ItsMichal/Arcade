@@ -24,7 +24,7 @@ public class ArduinoInterface : MonoBehaviour
         // Find the COM port containing "usbmodem" from the 
         //list of COM Ports and set it as
         //the active port
-
+        serialPort.PopulateComPorts();
         List<string> ports = serialPort.ComPorts;
         foreach (string port in ports)
         {
@@ -35,6 +35,7 @@ public class ArduinoInterface : MonoBehaviour
                 break;
             }
         }
+
 
         serialPort.OpenSerialPort();
 

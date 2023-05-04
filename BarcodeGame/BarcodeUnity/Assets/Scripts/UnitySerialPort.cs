@@ -264,7 +264,7 @@ public class UnitySerialPort : MonoBehaviour
         // If set to true then open the port. You must 
         // ensure that the port is valid etc. for this! 
 
-        if (OpenPortOnStart) { OpenSerialPort(); }
+        // if (OpenPortOnStart) { OpenSerialPort(); }
     }
 
     /// <summary>
@@ -833,7 +833,7 @@ public class UnitySerialPort : MonoBehaviour
 
             comPorts.Add(cPort);
 
-            // Debug.Log(cPort.ToString());
+            Debug.Log(cPort.ToString());
         }
 
         // Update the port status just in case :)

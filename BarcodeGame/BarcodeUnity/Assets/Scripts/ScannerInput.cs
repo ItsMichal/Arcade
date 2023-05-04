@@ -41,10 +41,8 @@ public class ScannerInput : MonoBehaviour
             timeSinceLastKeypress = 0f;
             lastRead += Input.inputString;
             if(lastRead.Contains("\t") || lastRead.Contains("\r") || lastRead.Contains("\n")){
-                //Remove the newline or tab character
-                lastRead = lastRead.Replace("\t", "");
-                lastRead = lastRead.Replace("\r", "");
-                lastRead = lastRead.Replace("\n", "");
+                //Remove any non alphanumeric characters
+                lastRead = System.Text.RegularExpressions.Regex.Replace(lastRead, "[^a-zA-Z0-9]", "");
 
                 onScanRead(lastRead);
                 lastRead = "";
